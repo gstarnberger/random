@@ -10,6 +10,10 @@
 #
 # * Apache / nginx / whatever log parser (so that logs can be directly fed from
 # syslog to analyzer)
+#
+# * Restrict methods that can be called by xml-rpc clients
+
+import pickle
 
 class LogStats(object):
     def __init__(self, *args, **kw_args):
@@ -30,6 +34,24 @@ class LogStats(object):
         # Keeps track of incoming requests. Each key tracks the requests for the
         # interval between the key and key + resolution.
         self.requests = {}
+
+    def load(self, filename):
+        # FIXME: xml-rpc client must not be able to call this
+
+        f = open(filename, 'rb')
+        self.requests = pickle.load(f)
+        self.resolution= pickle.load(f)
+        self.percentiles= pickle.load(f)
+        f.close()
+
+    def save(self, filename):
+        # FIXME: xml-rpc client must not be able to call this
+
+        f = open(filename, 'wb')
+        pickle.dump(self.requests, f)
+        pickle.dump(self.resolution, f)
+        pickle.dump(self.percentiles, f)
+        f.close()
 
     def get_interval(self, duration):
         """Converts duration of event into interval-key for the self.requests

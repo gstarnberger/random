@@ -30,6 +30,23 @@ class SimpleLogTest(unittest.TestCase):
         self.logstats.add_event(1303320839.166726, 150)
         self.assertEqual(self.logstats.get_median(), 100)
 
+    def test_save_load(self):
+        self.logstats.add_event(1303320839.166726, 50)
+        self.logstats.add_event(1303320839.166726, 100)
+        self.logstats.add_event(1303320839.166726, 100) # Median
+        self.logstats.add_event(1303320839.166726, 100)
+        self.logstats.add_event(1303320839.166726, 150)
+
+        self.logstats.save('/tmp/logstats.dump')
+
+        self.logstats.reset()
+
+        self.assertRaises(KeyError, self.logstats.get_median, 100)
+
+        self.logstats.load('/tmp/logstats.dump')
+
+        self.assertEqual(self.logstats.get_median(), 100)
+
     def assert_median(self, median):
         self.assertEquals(median, self.logstats.get_median())
         self.assertEquals(median, self.logstats.get_percentile(50))
