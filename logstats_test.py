@@ -22,21 +22,21 @@ class SimpleLogTest(unittest.TestCase):
     
     def test_median(self):
         self.logstats.add_event(1303000010, 200)
-        self.assertMedian(200)        
+        self.assert_median(200)        
         self.logstats.add_event(1303000020, 100)
-        self.assertMedian(150)
+        self.assert_median(150)
         self.logstats.add_event(1303000030, 50)
-        self.assertMedian(100)        
+        self.assert_median(100)        
 
     def test_median_with_resolution(self):
         self.logstats.add_event(1303000010, 109)
-        self.assertMedian(100)
+        self.assert_median(100)
 
         self.logstats.add_event(1303000020, 204)
-        self.assertMedian(150)
+        self.assert_median(150)
 
         self.logstats.add_event(1303000030, 1000)
-        self.assertMedian(200)    
+        self.assert_median(200)    
 
     def test_invalid(self):
         self.assertRaises(ValueError, self.logstats.add_event, 1303320839.166726, -20)
