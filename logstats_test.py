@@ -30,6 +30,28 @@ class SimpleLogTest(unittest.TestCase):
         self.logstats.add_event(1303320839.166726, 150)
         self.assertEqual(self.logstats.get_median(), 100)
 
+    def assert_median(self, median):
+        self.assertEquals(median, self.logstats.get_median())
+        self.assertEquals(median, self.logstats.get_percentile(50))
+
+    def test_median(self):
+        self.logstats.add_event(1303000010, 200)
+        self.assert_median(200)
+        self.logstats.add_event(1303000020, 100)
+        self.assert_median(150)
+        self.logstats.add_event(1303000030, 50)
+        self.assert_median(100)
+
+    def test_median_with_resolution(self):
+        self.logstats.add_event(1303000010, 109)
+        self.assert_median(100)
+
+        self.logstats.add_event(1303000020, 204)
+        self.assert_median(150)
+
+        self.logstats.add_event(1303000030, 1000)
+        self.assert_median(200)
+
     def test_invalid(self):
         self.assertRaises(ValueError, self.logstats.add_event, 1303320839.166726, -20)
 
