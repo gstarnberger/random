@@ -1,5 +1,16 @@
 #!/usr/bin/env python2
 
+# Todo / Ideas:
+#
+# * Persistent (and possibly more efficient) storage
+#
+# * Distributed updating -> could be an issue in large deployments. can be
+# solved with slave nodes that regularly transmit aggregated statistics to
+# master
+#
+# * Apache / nginx / whatever log parser (so that logs can be directly fed from
+# syslog to analyzer)
+
 class LogStats(object):
     def __init__(self, *args, **kw_args):
         self.reset(*args, **kw_args)
@@ -39,8 +50,13 @@ class LogStats(object):
         # Increment counter for given interval in given class
         event_class_dict[event_interval] = event_class_dict.get(event_interval, 0) + 1
 
-    def get_foo(self):
-        return self.requests
+    def get_median(self):
+        return self.get_percentile(100)
+
+    def get_percentile(self, percentile):
+        """Returns percentile of requests for given class. Input given in percent."""
+
+        pass
 
 if __name__ == '__main__':
     pass
