@@ -50,44 +50,6 @@ class LogStats(object):
         # Increment counter for given interval in given class
         event_class_dict[event_interval] = event_class_dict.get(event_interval, 0) + 1
 
-    def get_median(self, event_class = 'default', maxval = None):
-        """Gets median from a list of interval ranges"""
-
-        if maxval is None:
-            maxval = max(self.requests[event_class].keys())
-
-        keys = range(0, maxval + self.resolution, self.resolution)
-
-        left = 0
-        right = sum([self.requests[event_class].get(key, 0) for key in keys])
-        min_error = right
-        valid_list = []
-
-        for key in keys:
-            value = self.requests[event_class].get(key, 0)
-
-            left = left + value
-            right = right - value
-
-            error = right - left
-
-            if (error != 0) and (error == -min_error):
-                # We just skipped over the median key
-                return key
-            elif abs(error) > abs(min_error):
-                # Error increases, we've passed the median key
-                break
-            elif error == min_error:
-                # There may be multiple valid solutions, store all of them and then take median
-                valid_list.append(key)
-            elif abs(error) < abs(min_error):
-                min_error = error
-                valid_list = [key]
-            else:
-                raise AssertionError("This shouldn't happen")
-
-        return valid_list[len(valid_list) / 2]
-
     def get_percentile(self, percentile, event_class = 'default', maxval = None):
         """Gets median from a list of interval ranges"""
 
