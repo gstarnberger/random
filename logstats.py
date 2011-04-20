@@ -78,20 +78,61 @@ class LogStats(object):
                 # Error increases, we've passed the median key
                 break
             elif error == min_error:
+                # There may be multiple valid solutions, store all of them and then take median
                 valid_list.append(key)
-            else:
+            elif abs(error) < abs(min_error):
                 min_error = error
                 valid_list = [key]
+            else:
+                raise AssertionError("This shouldn't happen")
 
         return valid_list[len(valid_list) / 2]
 
-    def get_median_foo(self):
-        return self.get_percentile(100)
+    def get_percentile(self, percentile, event_class = 'default', maxval = None):
+        """Gets median from a list of interval ranges"""
 
-    def get_percentile(self, percentile):
-        """Returns percentile of requests for given class. Input given in percent."""
+        if maxval is None:
+            maxval = max(self.requests[event_class].keys())
 
-        pass
+        keys = range(0, maxval + self.resolution, self.resolution)
+
+        left = 0
+        right = sum([self.requests[event_class].get(key, 0) for key in keys])
+        min_error = right
+        valid_list = []
+
+        fraction_left = percentile / 100.0
+        fraction_right = 1 - fraction_left
+
+        for key in keys:
+            value = self.requests[event_class].get(key, 0)
+
+            left = left + value
+            right = right - value
+
+            error = right * fraction_right - left * fraction_left
+
+            if (error != 0) and (error == -min_error):
+                # We just skipped over the median key
+                return key
+            elif abs(error) > abs(min_error):
+                # Error increases, we've passed the median key
+                break
+            elif error == min_error:
+                # There may be multiple valid solutions, store all of them and then take median
+                valid_list.append(key)
+            elif abs(error) < abs(min_error):
+                min_error = error
+                valid_list = [key]
+            else:
+                raise AssertionError("This shouldn't happen")
+
+        return valid_list[len(valid_list) / 2]
+
+    def get_median(self, *args, **kwargs):
+        """Gets median from a list of interval ranges"""
+
+        return self.get_percentile(50, *args, **kwargs)
 
 if __name__ == '__main__':
     pass
