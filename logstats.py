@@ -61,6 +61,7 @@ class LogStats(object):
         left = 0
         right = sum([self.requests[event_class].get(key, 0) for key in keys])
         min_error = right
+        valid_list = []
 
         for key in keys:
             value = self.requests[event_class].get(key, 0)
@@ -70,17 +71,19 @@ class LogStats(object):
 
             error = right - left
 
-            if abs(error) > abs(min_error):
+            if (error != 0) and (error == -min_error):
+                # We just skipped over the median key
+                return key
+            elif abs(error) > abs(min_error):
                 # Error increases, we've passed the median key
                 break
-            elif error == min_error * -1:
-                # We just skipped over the median key
-                break
+            elif error == min_error:
+                valid_list.append(key)
             else:
-                # FIXME: Which class do we choose if multiple classes would give a valid median?
                 min_error = error
+                valid_list = [key]
 
-        return key
+        return valid_list[len(valid_list) / 2]
 
     def get_median_foo(self):
         return self.get_percentile(100)
