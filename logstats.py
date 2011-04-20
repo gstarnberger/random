@@ -27,30 +27,27 @@ class LogStats(object):
 
         return event_class_dict
 
-    def reset(self, resolution = 10, percentiles = [25, 75]):
+    def reset(self, resolution = 10):
         self.resolution = resolution
-        self.percentiles = percentiles
 
         # Keeps track of incoming requests. Each key tracks the requests for the
         # interval between the key and key + resolution.
         self.requests = {}
 
     def load(self, filename):
-        # FIXME: xml-rpc client must not be able to call this
+        # FIXME: xml-rpc client must not be able to call this (security issues)
 
         f = open(filename, 'rb')
         self.requests = pickle.load(f)
         self.resolution= pickle.load(f)
-        self.percentiles= pickle.load(f)
         f.close()
 
     def save(self, filename):
-        # FIXME: xml-rpc client must not be able to call this
+        # FIXME: xml-rpc client must not be able to call this (security issues)
 
         f = open(filename, 'wb')
         pickle.dump(self.requests, f)
         pickle.dump(self.resolution, f)
-        pickle.dump(self.percentiles, f)
         f.close()
 
     def get_interval(self, duration):
@@ -78,11 +75,16 @@ class LogStats(object):
         event_class_dict[event_interval] = event_class_dict.get(event_interval, 0) + 1
 
     def add_aggregated_events(self, aggregated_events, event_class = 'default'):
+        """Add aggregated data to logged data. Resolution must correspond to server's resolution."""
 
         event_class_dict = self._get_event_class(event_class)
 
         for key in aggregated_events.keys():
             ikey = int(key)
+
+            if ikey % self.resolution != 0:
+                raise ValueError('Aggregated data resolution does not match server resolution')
+
             event_class_dict[ikey] = event_class_dict.get(ikey, 0) + aggregated_events[key]
 
     def get_percentile(self, percentile, event_class = 'default', maxval = None):

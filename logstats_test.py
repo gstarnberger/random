@@ -47,6 +47,13 @@ class SimpleLogTest(unittest.TestCase):
 
         self.assertEqual(self.logstats.get_median(), 100)
 
+    def test_aggregated(self):
+        self.logstats.add_aggregated_events({"50": 10, "100": 20, "150": 10})
+
+        self.assertEqual(self.logstats.get_median(), 100)
+
+        self.assertRaises(ValueError, self.logstats.add_aggregated_events, {"55": 10, "107": 20, "153": 10})
+
     def assert_median(self, median):
         self.assertEquals(median, self.logstats.get_median())
         self.assertEquals(median, self.logstats.get_percentile(50))
