@@ -15,6 +15,14 @@ class LogStats(object):
     def __init__(self, *args, **kw_args):
         self.reset(*args, **kw_args)
 
+    def _get_event_class(self, event_class):
+        if not self.requests.has_key(event_class):
+            self.requests[event_class] = {}
+
+        event_class_dict = self.requests[event_class]
+
+        return event_class_dict
+
     def reset(self, resolution = 10, percentiles = [25, 75]):
         self.resolution = resolution
         self.percentiles = percentiles
@@ -40,15 +48,20 @@ class LogStats(object):
         if duration < 0:
             raise ValueError('Duration must be larger than zero')
 
-        if not self.requests.has_key(event_class):
-            self.requests[event_class] = {}
-
-        event_class_dict = self.requests[event_class]
+        event_class_dict = self._get_event_class(event_class)
 
         event_interval = self.get_interval(duration)
 
         # Increment counter for given interval in given class
         event_class_dict[event_interval] = event_class_dict.get(event_interval, 0) + 1
+
+    def add_aggregated_events(self, aggregated_events, event_class = 'default'):
+
+        event_class_dict = self._get_event_class(event_class)
+
+        for key in aggregated_events.keys():
+            ikey = int(key)
+            event_class_dict[ikey] = event_class_dict.get(ikey, 0) + aggregated_events[key]
 
     def get_percentile(self, percentile, event_class = 'default', maxval = None):
         """Gets median from a list of interval ranges"""
